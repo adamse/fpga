@@ -1,0 +1,22 @@
+package Led where
+
+interface Leds =
+  leds :: Bit 16
+
+{-# properties mkLeds = { alwaysReady, alwaysEnabled } #-}
+mkLeds :: Reg (Bit 16) -> Module Leds
+mkLeds status = module
+  interface Leds
+    leds = status._read
+
+interface Top =
+  leds :: Leds
+
+{-# properties mkTop = { alwaysReady, alwaysEnabled } #-}
+mkTop :: Module Top
+mkTop = module
+  led_status :: Reg (Bit 16) <- mkReg 0b1000100010001000
+  leds <- mkLeds led_status
+
+  interface 
+    leds = leds
