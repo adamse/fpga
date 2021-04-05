@@ -3,14 +3,25 @@ package Led where
 interface Leds =
   leds :: Bit 16
 
-{-# properties mkLeds = { alwaysReady, alwaysEnabled } #-}
+-- {-# properties mkLeds = { alwaysReady, alwaysEnabled } #-}
 mkLeds :: Reg (Bit 16) -> Module Leds
 mkLeds status = module
   interface Leds
     leds = status._read
 
+interface SwitchInputs =
+  switches :: Bit 16 -> Action
+
+-- {-# properties mkSwitchInputs = { alwaysReady, alwaysEnabled } #-}
+mkSwitchInputs :: Reg (Bit 16) -> Module SwitchInputs
+mkSwitchInputs status = module
+  interface SwitchInputs
+    switches values = do
+      status := values
+
 interface Top =
   leds :: Leds
+  switches :: SwitchInputs
 
 {-# properties mkTop = { alwaysReady, alwaysEnabled } #-}
 mkTop :: Module Top
@@ -18,5 +29,15 @@ mkTop = module
   led_status :: Reg (Bit 16) <- mkReg 0b1000100010001000
   leds <- mkLeds led_status
 
+  switches :: Reg (Bit 16)
+  switches <- mkRegU
+
+  switch_inputs <- mkSwitchInputs switches
+
   interface 
     leds = leds
+    switches = switch_inputs
+
+  rules
+    when True ==> action
+      led_status := switches
