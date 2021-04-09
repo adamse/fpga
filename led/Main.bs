@@ -2,20 +2,56 @@ package Main where
 
 import Basys3Top
 
+digitToBits :: UInt 4 -> Bit 7
+digitToBits x = case x of
+  0 -> 0b1000000
+  1 -> 0b1111001
+  2 -> 0b0100100
+  3 -> 0b0110000
+  4 -> 0b0011001
+  5 -> 0b0010010
+  6 -> 0b0000010
+  7 -> 0b1111000
+  8 -> 0b0000000
+  9 -> 0b0010000
+  _ -> 0b1111111
+
 {-# properties mkTop = { alwaysReady, alwaysEnabled } #-}
 mkTop :: Module Basys3Top
 mkTop = module
-  led_status :: Reg (Bit 16)
-  led_status <- mkReg 0b1000100010001000
 
   lights_on :: Reg Bool
   lights_on <- mkReg False
 
-  timer :: Reg (UInt 24)
+  timer :: Reg (UInt 25)
   timer <- mkReg 0
 
   switches :: Reg (Bit 16)
   switches <- mkRegU
+
+  seven_segment :: SevenSegment
+  seven_segment <- module
+    count :: Reg (UInt 4)
+    count <- mkReg 0
+
+    pos :: Reg (UInt 2)
+    pos <- mkReg 0b00
+
+    rules
+      when pos == 3, timer == 0 ==> do
+        count := count + 1
+
+      when timer == 0 ==> do
+        pos := pos + 1
+
+    interface
+      seg = digitToBits count
+      dp = 0b1
+      an = case pos of
+        0 -> 0b0111
+        1 -> 0b1011
+        2 -> 0b1101
+        3 -> 0b1110
 
   rules
     when True ==> do
@@ -23,13 +59,11 @@ mkTop = module
 
     when (timer == 0) ==> do
       lights_on := not lights_on
-      
-    when lights_on ==> do
-      led_status := switches
 
-    when (not lights_on) ==> do
-      led_status := 0
-
-  interface 
-    leds = led_status
+  interface
+    leds =
+      if lights_on
+      then switches
+      else 0
     switches values = switches := values
+    seven_segment = seven_segment

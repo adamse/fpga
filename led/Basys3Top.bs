@@ -1,7 +1,13 @@
 package Basys3Top where
 
+interface SevenSegment =
+  seg :: Bit 7
+  dp :: Bit 1
+  an :: Bit 4
+
 interface Basys3Top =
-	-- set leds
-	leds :: Bit 16
-	-- read switches
-	switches :: Bit 16 -> Action
+  seven_segment :: SevenSegment
+  -- set leds
+  leds :: Bit 16
+  -- read switches
+  switches :: Bit 16 -> Action
