@@ -1,6 +1,16 @@
 package Main where
 
+import Vector -- (Vector, (!!), replicate)
+
 import Basys3Top
+
+struct ButtonState =
+  { up :: Bool
+  ; down :: Bool
+  ; left :: Bool
+  ; right :: Bool
+  }
+  deriving (Bits)
 
 digitToBits :: UInt 4 -> Bit 7
 digitToBits x = case x of
@@ -29,6 +39,9 @@ mkTop = module
   switches :: Reg (Bit 16)
   switches <- mkRegU
 
+  pressed_buttons :: Reg ButtonState
+  pressed_buttons <- mkReg (ButtonState { up = False; down = False; left = False; right = False })
+
   seven_segment :: SevenSegment
   seven_segment <- module
     count :: Reg (UInt 4)
@@ -38,11 +51,12 @@ mkTop = module
     pos <- mkReg 0b00
 
     rules
-      when pos == 3, timer == 0 ==> do
-        count := count + 1
-
       when timer == 0 ==> do
         pos := pos + 1
+      "up": when timer == 0, pressed_buttons.up ==> do
+        count := count + 1
+      "down": when timer == 0, pressed_buttons.down ==> do
+        count := count - 1
 
     interface
       seg = digitToBits count
@@ -60,6 +74,14 @@ mkTop = module
     when (timer == 0) ==> do
       lights_on := not lights_on
 
+  buttons :: Buttons
+  buttons <- module
+    interface
+      bup pressed = pressed_buttons := pressed_buttons { up = pressed }
+      bdown pressed = pressed_buttons := pressed_buttons { down = pressed }
+      bleft pressed = pressed_buttons := pressed_buttons { left = pressed }
+      bright pressed = pressed_buttons := pressed_buttons { right = pressed }
+
   interface
     leds =
       if lights_on
@@ -67,3 +89,4 @@ mkTop = module
       else 0
     switches values = switches := values
     seven_segment = seven_segment
+    buttons = buttons

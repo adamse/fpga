@@ -107,17 +107,17 @@ set_property PACKAGE_PIN W4 [get_ports {an[3]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {an[3]}]
 
 
-##Buttons
-#set_property PACKAGE_PIN U18 [get_ports btnC]
-#set_property IOSTANDARD LVCMOS33 [get_ports btnC]
-#set_property PACKAGE_PIN T18 [get_ports btnU]
-#set_property IOSTANDARD LVCMOS33 [get_ports btnU]
-#set_property PACKAGE_PIN W19 [get_ports btnL]
-#set_property IOSTANDARD LVCMOS33 [get_ports btnL]
-#set_property PACKAGE_PIN T17 [get_ports btnR]
-#set_property IOSTANDARD LVCMOS33 [get_ports btnR]
-#set_property PACKAGE_PIN U17 [get_ports btnD]
-#set_property IOSTANDARD LVCMOS33 [get_ports btnD]
+# Buttons
+set_property PACKAGE_PIN U18 [get_ports btn_c]
+set_property IOSTANDARD LVCMOS33 [get_ports btn_c]
+set_property PACKAGE_PIN T18 [get_ports btn_u]
+set_property IOSTANDARD LVCMOS33 [get_ports btn_u]
+set_property PACKAGE_PIN W19 [get_ports btn_l]
+set_property IOSTANDARD LVCMOS33 [get_ports btn_l]
+set_property PACKAGE_PIN T17 [get_ports btn_r]
+set_property IOSTANDARD LVCMOS33 [get_ports btn_r]
+set_property PACKAGE_PIN U17 [get_ports btn_d]
+set_property IOSTANDARD LVCMOS33 [get_ports btn_d]
 
 
 

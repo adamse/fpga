@@ -6,8 +6,15 @@ interface SevenSegment =
   an :: Bit 4
 
 interface Basys3Top =
+  buttons :: Buttons
   seven_segment :: SevenSegment
   -- set leds
   leds :: Bit 16
   -- read switches
   switches :: Bit 16 -> Action
+
+interface Buttons =
+  bup :: Bool -> Action
+  bright :: Bool -> Action
+  bdown :: Bool -> Action
+  bleft :: Bool -> Action
