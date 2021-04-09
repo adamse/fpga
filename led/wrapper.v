@@ -9,8 +9,8 @@ wire rst;
 mkTop main(
   .CLK(clk),
   .RST_N(rst),
-  .leds_leds(led),
-  .switches_switches_1(sw)
+  .leds(led),
+  .switches_1(sw)
 );
 
 assign rst = 1;

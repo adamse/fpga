@@ -1,0 +1,35 @@
+package Main where
+
+import Basys3Top
+
+{-# properties mkTop = { alwaysReady, alwaysEnabled } #-}
+mkTop :: Module Basys3Top
+mkTop = module
+  led_status :: Reg (Bit 16)
+  led_status <- mkReg 0b1000100010001000
+
+  lights_on :: Reg Bool
+  lights_on <- mkReg False
+
+  timer :: Reg (UInt 24)
+  timer <- mkReg 0
+
+  switches :: Reg (Bit 16)
+  switches <- mkRegU
+
+  rules
+    when True ==> do
+      timer := timer + 1
+
+    when (timer == 0) ==> do
+      lights_on := not lights_on
+      
+    when lights_on ==> do
+      led_status := switches
+
+    when (not lights_on) ==> do
+      led_status := 0
+
+  interface 
+    leds = led_status
+    switches values = switches := values

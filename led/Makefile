@@ -1,5 +1,11 @@
+ODIR=_out
+SOURCES_BS=$(wildcard *.bs)
 
-all: mkTop.v
+all: $(ODIR)/mkTop.v
 
-mkTop.v: Led.bs
-	bsc -verilog -g mkTop -u $<
+clean:
+	$(RM) -r _out
+
+$(ODIR)/mkTop.v: Main.bs $(SOURCES_BS)
+	mkdir -p $(ODIR)
+	bsc -bdir $(ODIR) -vdir $(ODIR) -verilog -g mkTop -u $<
