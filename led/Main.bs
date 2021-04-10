@@ -6,12 +6,21 @@ import Basys3Top
 import ClockDiv
 
 struct ButtonState =
-  { up :: Bool
-  ; down :: Bool
-  ; left :: Bool
-  ; right :: Bool
+  { up :: Reg Bool
+  ; down :: Reg Bool
+  ; left :: Reg Bool
+  ; right :: Reg Bool
   }
   deriving (Bits)
+
+mkButtonState :: Module ButtonState
+mkButtonState = module
+  up <- mkReg False
+  down <- mkReg False
+  left <- mkReg False
+  right <- mkReg False
+
+  return (ButtonState { up = up; down = down; left = left; right = right })
 
 digitToBits :: UInt 4 -> Bit 7
 digitToBits x = case x of
@@ -40,8 +49,8 @@ mkTop = module
   switches :: Reg (Bit 16)
   switches <- mkRegU
 
-  pressed_buttons :: Reg ButtonState
-  pressed_buttons <- mkReg (ButtonState { up = False; down = False; left = False; right = False })
+  pressed_buttons :: ButtonState
+  pressed_buttons <- mkButtonState
 
   seven_segment :: SevenSegment
   seven_segment <- module
@@ -80,10 +89,10 @@ mkTop = module
   buttons :: Buttons
   buttons <- module
     interface
-      bup pressed = pressed_buttons := pressed_buttons { up = pressed }
-      bdown pressed = pressed_buttons := pressed_buttons { down = pressed }
-      bleft pressed = pressed_buttons := pressed_buttons { left = pressed }
-      bright pressed = pressed_buttons := pressed_buttons { right = pressed }
+      bup pressed = pressed_buttons.up := pressed
+      bdown pressed = pressed_buttons.down := pressed
+      bleft pressed = pressed_buttons.left := pressed
+      bright pressed = pressed_buttons.right := pressed
 
   interface
     leds =
