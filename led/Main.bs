@@ -1,9 +1,8 @@
 package Main where
 
-import Vector -- (Vector, (!!), replicate)
+import Clocks
 
 import Basys3Top
-import ClockDiv
 
 struct ButtonState =
   { up :: Reg Bool
@@ -43,8 +42,10 @@ mkTop = module
   lights_on :: Reg Bool
   lights_on <- mkReg False
 
-  clock :: ClockDiv (UInt 24)
-  clock <- mkClockDiv
+  -- 100 mhz default clock
+  -- 2 hz
+  -- divide by 50m
+  two_hz <- mkGatedClockDivider 50_000_000
 
   switches :: Reg (Bit 16)
   switches <- mkRegU
@@ -61,10 +62,10 @@ mkTop = module
     pos <- mkReg 0b00
 
     rules
-      when clock.run_now ==> do
+      when two_hz.clockReady ==> do
         pos := pos + 1
 
-      when clock.run_now ==> do
+      when two_hz.clockReady ==> do
         let d =
               if pressed_buttons.up
               then 1
@@ -83,7 +84,7 @@ mkTop = module
         3 -> 0b1110
 
   rules
-    when clock.run_now ==> do
+    when two_hz.clockReady ==> do
       lights_on := not lights_on
 
   buttons :: Buttons
