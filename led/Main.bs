@@ -53,53 +53,50 @@ mkTop = module
   pressed_buttons :: ButtonState
   pressed_buttons <- mkButtonState
 
-  seven_segment :: SevenSegment
-  seven_segment <- module
-    count :: Reg (UInt 4)
-    count <- mkReg 0
+  count :: Reg (UInt 4)
+  count <- mkReg 0
 
-    pos :: Reg (UInt 2)
-    pos <- mkReg 0b00
+  pos :: Reg (UInt 2)
+  pos <- mkReg 0b00
 
-    rules
-      when two_hz.clockReady ==> do
-        pos := pos + 1
+  rules
+    when two_hz.clockReady ==> do
+      pos := pos + 1
 
-      when two_hz.clockReady ==> do
-        let d =
-              if pressed_buttons.up
-              then 1
-              else if pressed_buttons.down
-              then negate 1
-              else 0
-        count := count + d
-
-    interface
-      seg = digitToBits count
-      dp = 0b1
-      an = case pos of
-        0 -> 0b0111
-        1 -> 0b1011
-        2 -> 0b1101
-        3 -> 0b1110
+    when two_hz.clockReady ==> do
+      let d =
+            if pressed_buttons.up
+            then 1
+            else if pressed_buttons.down
+            then negate 1
+            else 0
+      count := count + d
 
   rules
     when two_hz.clockReady ==> do
       lights_on := not lights_on
-
-  buttons :: Buttons
-  buttons <- module
-    interface
-      bup pressed = pressed_buttons.up := pressed
-      bdown pressed = pressed_buttons.down := pressed
-      bleft pressed = pressed_buttons.left := pressed
-      bright pressed = pressed_buttons.right := pressed
 
   interface
     leds =
       if lights_on
       then switches
       else 0
+
     switches values = switches := values
-    seven_segment = seven_segment
-    buttons = buttons
+
+    seven_segment =
+      interface SevenSegment
+        seg = digitToBits count
+        dp = 0b1
+        an = case pos of
+          0 -> 0b0111
+          1 -> 0b1011
+          2 -> 0b1101
+          3 -> 0b1110
+
+    buttons =
+      interface Buttons
+        bup pressed = pressed_buttons.up := pressed
+        bdown pressed = pressed_buttons.down := pressed
+        bleft pressed = pressed_buttons.left := pressed
+        bright pressed = pressed_buttons.right := pressed
