@@ -39,7 +39,7 @@ mkUART baudrate = module
   rules
     "start_send": when clock.clockReady, not isSending ==> do
       let byte = send_fifo.first
-      let parity :: Bit 1 = reduceXor 8'd65
+      let parity :: Bit 1 = reduceXor byte
       let bits :: Bit 11 = 1'b0 ++ byte ++ parity ++ 1'b1
       send_fifo.deq
       send_state := Sending bits
