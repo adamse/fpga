@@ -8,9 +8,8 @@ interface SevenSegment =
 interface Basys3Top =
   buttons :: Buttons
   seven_segment :: SevenSegment
-  -- set leds
+  rs232 :: RS232
   leds :: Bit 16
-  -- read switches
   switches :: Bit 16 -> Action
 
 interface Buttons =
@@ -18,3 +17,7 @@ interface Buttons =
   bright :: Bool -> Action
   bdown :: Bool -> Action
   bleft :: Bool -> Action
+
+interface RS232 =
+  tx :: Bit 1
+  rx :: Bit 1 -> Action

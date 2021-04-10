@@ -1,0 +1,61 @@
+package UART where
+
+import GetPut
+import Clocks
+import FIFO
+
+type Byte = Bit 8
+
+interface UART =
+  tx :: Bit 1
+  rx :: Bit 1 -> Action
+  send :: Put Byte
+  recieve :: Get Byte
+
+data SendState = Sending (Bit 11) | NotSending
+  deriving (Eq, Bits)
+
+
+mkUART :: Integer -> Module UART
+mkUART baudrate = module
+  clock <- mkGatedClockDivider (100_000_000 / baudrate)
+
+  recieved_fifo :: FIFO Byte
+  recieved_fifo <- mkSizedFIFO 64
+
+  send_fifo :: FIFO Byte
+  send_fifo <- mkSizedFIFO 64
+
+  send_state :: Reg SendState
+  send_state <- mkReg NotSending
+
+  send_bit_index :: Reg (UInt 4)
+  send_bit_index <- mkReg 0
+
+  let isSending = case send_state of
+        Sending _ -> True
+        NotSending -> False
+
+  rules
+    "start_send": when clock.clockReady, not isSending ==> do
+      let byte = send_fifo.first
+      let parity :: Bit 1 = reduceXor 8'd65
+      let bits :: Bit 11 = 1'b0 ++ byte ++ parity ++ 1'b1
+      send_fifo.deq
+      send_state := Sending bits
+      send_bit_index := 0
+
+    "send": when clock.clockReady, isSending ==> do
+      send_bit_index := send_bit_index + 1
+      if send_bit_index == 11
+        then send_state := NotSending
+        else noAction
+
+  interface
+    tx = case send_state of
+      Sending x -> x[send_bit_index:send_bit_index]
+      NotSending -> 1'b1
+    rx _ = noAction
+    send = toPut send_fifo
+    recieve = toGet recieved_fifo
+

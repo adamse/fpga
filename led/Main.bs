@@ -1,8 +1,10 @@
 package Main where
 
 import Clocks
+import GetPut
 
 import Basys3Top
+import UART
 
 struct ButtonState =
   { up :: Reg Bool
@@ -59,6 +61,21 @@ mkTop = module
   pos :: Reg (UInt 2)
   pos <- mkReg 0b00
 
+  uart <- mkUART 9600
+
+  adam_counter :: Reg (UInt 3)
+  adam_counter <- mkReg 0
+
+  rules
+    when True ==> do
+      case adam_counter of
+        0 -> uart.send.put 65
+        1 -> uart.send.put 68
+        2 -> uart.send.put 65
+        3 -> uart.send.put 77
+        _ -> uart.send.put 32
+      adam_counter := adam_counter + 1
+
   rules
     when two_hz.clockReady ==> do
       pos := pos + 1
@@ -100,3 +117,8 @@ mkTop = module
         bdown pressed = pressed_buttons.down := pressed
         bleft pressed = pressed_buttons.left := pressed
         bright pressed = pressed_buttons.right := pressed
+
+    rs232 =
+      interface RS232
+        tx = uart.tx
+        rx = uart.rx

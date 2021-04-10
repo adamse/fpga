@@ -20,7 +20,7 @@ pkgs.mkShell {
     pkgs.zlib
     pkgs.gmp
     pkgs.screen
-    pkgs.minicom
+    pkgs.picocom
     pkgs.bluespec
   ];
   XRAY_VIVADO_SETTINGS = "/home/adam/opt/Xilinx/Vivado/2017.2/settings64.sh";
