@@ -1,0 +1,15 @@
+package ClockDiv where
+
+interface ClockDiv t =
+  run_now :: Bool
+
+mkClockDiv :: (Eq t, Arith t, Bits t ts) => Module (ClockDiv t)
+mkClockDiv = module
+  counter :: Reg t
+  counter <- mkReg 0
+
+  rules
+    when True ==> counter := counter + 1
+
+  interface
+    run_now = counter == 0
